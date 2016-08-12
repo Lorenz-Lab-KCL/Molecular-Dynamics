@@ -16,8 +16,8 @@ if __name__ == "__main__":
     argparser = argparse.ArgumentParser(description="Removes the water/sol if any of the atoms reside withing the request Z dimension")
     argparser.add_argument("-f", help="filename .gro from which to remove", metavar="source .gro filename", required=True, type=str)
     argparser.add_argument("-o", help="name of the filename", metavar="output filename", required=True)
-    argparser.add_argument("-b", help="start/begin of Z dimension in angstroms", metavar="float", required=True, type=float)
-    argparser.add_argument("-e", help="end of Z dimension in angstroms", metavar="float", type=float, required=True)
+    argparser.add_argument("-b", help="start/begin of Z dimension in angstroms", metavar="float", type=float)
+    argparser.add_argument("-e", help="end of Z dimension in angstroms", metavar="float", type=float)
 
     # parse arguments
     args = argparser.parse_args(sys.argv[1:])
@@ -25,8 +25,8 @@ if __name__ == "__main__":
     assert os.path.exists(source_filename), "Argument -f must point to a file"
     output_filename = args.o
     assert '.' in output_filename, 'The output file name has to have an extension that MDAnalysis is capabable of writing, including .gro or .pdb'
-    zbegin = args.b
-    zend = args.e
+    zbegin = args.b if args.b is not None else sys.float_info.min
+    zend = args.e if args.e is not None else sys.float_info.max
     assert zbegin < zend, "The first Z dimension value has to be smaller than the second"
 
     print 'Remove water molecules if any of their atoms reside in Z dim ', zbegin, zend
