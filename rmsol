@@ -2,8 +2,14 @@
 """
 Remove the water molecules which have at least one atom in the in Z region specified.
 
-e.g. The following will remove all SOL solvent molecules which have at least one atom in the Z dimension between coordinates 2 and 6
+# e.g. The following will remove all SOL solvent molecules which have at least one atom in the Z dimension between coordinates 2 and 6
 remove_solatoms.py -f file.gro -o output.gro -b 2 -e 6
+# remove all SOL in Z dimension starting from 20 angstroms
+remove_solatoms.py -f file.gro -o output.gro -b 20 
+# remove all SOL in Z dimension up to 60 angstrom in Z dimension
+remove_solatoms.py -f file.gro -o output.gro -e 60
+# remove all water
+remove_solatoms.py -f file.gro -o output.gro
 """
 
 import argparse
