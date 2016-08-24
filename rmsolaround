@@ -1,0 +1,51 @@
+#!/usr/bin/env python
+
+"""
+Remove the water around the protein and make sure that the whole molecules have been removed.
+
+WARNING: this script will work incorrectly if molecules do not have unique molecule IDs
+"""
+import argparse
+import os
+import MDAnalysis
+import sys
+from itertools import groupby
+
+
+if __name__ == "__main__":
+    # argument parser
+    argparser = argparse.ArgumentParser(description="Removes the water/sol molecules around any atoms in the protein")
+    argparser.add_argument("-f", help="filename .gro from which to remove", metavar="source .gro filename", required=True, type=str)
+    argparser.add_argument("-o", help="name of the filename", metavar="output filename", required=True)
+    argparser.add_argument("-d", help="distance in angstroms", metavar="float", type=float, default=2)
+
+    # parse arguments
+    args = argparser.parse_args(sys.argv[1:])
+    source_filename = args.f
+    assert os.path.exists(source_filename), "Argument -f must point to a file"
+    output_filename = args.o
+    assert '.' in output_filename, 'The output file name has to have an extension that MDAnalysis is capabable of writing, including .gro or .pdb'
+    distance = args.d
+
+    u = MDAnalysis.Universe(source_filename)
+
+    # safety check: ensure that the residue ID is not repeated
+    # FIXME - it is not perfect. It would not detect consectuvie molecules with the same ID.
+    resids = [x[0] for x in groupby(u.atoms.resids)]    # removed consecutive duplicates
+    if len(resids) != len(set(resids)):
+        # get the duplicates
+        resids = sorted(resids)
+        duplicates = [n1 for n1, n2 in zip(resids, resids[1:]) if n1 == n2]
+        print 'The same residue aids have been reused ', duplicates
+        sys.exit()
+
+    # select all water atoms within the vicinity of the protein
+    clashing_sol_resids = u.select_atoms('resname SOL and around %d protein' % distance).resids
+
+    print 'Removing %d SOL molecules' % len(clashing_sol_resids)
+
+    # select all except the clashing
+    survivors_ids = [atom.id for atom in u.atoms if atom.resid not in clashing_sol_resids]
+
+    filtered = u.atoms[survivors_ids]
+    filtered.atoms.write(output_filename)
