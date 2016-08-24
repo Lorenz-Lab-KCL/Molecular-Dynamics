@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """
 Based modelled on Enrico's script "calculation-s2-dipole-backbone-aa.py". The calculations have been partly checked against Enrico's results which in turn have been tested earlier.
 
