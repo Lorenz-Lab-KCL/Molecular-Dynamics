@@ -4,6 +4,10 @@
 Remove the water around the protein and make sure that the whole molecules have been removed.
 
 WARNING: this script will work incorrectly if molecules do not have unique molecule IDs
+
+Hint: to renumber the residue number in the event of a clash, you can use gromacs:
+gmx editconf -f file.gro -o file.gro -resnr 1
+
 """
 import argparse
 import os
@@ -18,6 +22,8 @@ if __name__ == "__main__":
     argparser.add_argument("-f", help="filename .gro from which to remove", metavar="source .gro filename", required=True, type=str)
     argparser.add_argument("-o", help="name of the filename", metavar="output filename", required=True)
     argparser.add_argument("-d", help="distance in angstroms", metavar="float", type=float, default=2)
+    argparser.add_argument("-sel", help="select group around which SOL should be removed. Look into selection in mdanalysis for more."
+                                        , metavar="e.g. protein", type=str, default="protein")
 
     # parse arguments
     args = argparser.parse_args(sys.argv[1:])
@@ -26,6 +32,7 @@ if __name__ == "__main__":
     output_filename = args.o
     assert '.' in output_filename, 'The output file name has to have an extension that MDAnalysis is capabable of writing, including .gro or .pdb'
     distance = args.d
+    selected_group = args.sel
 
     u = MDAnalysis.Universe(source_filename)
 
@@ -36,11 +43,11 @@ if __name__ == "__main__":
         # get the duplicates
         resids = sorted(resids)
         duplicates = [n1 for n1, n2 in zip(resids, resids[1:]) if n1 == n2]
-        print 'The same residue aids have been reused ', duplicates
+        print 'Different molecules use the same residue IDs. Make sure the residue IDs are unique ', duplicates
         sys.exit()
 
     # select all water atoms within the vicinity of the protein
-    clashing_sol_resids = u.select_atoms('resname SOL and around %d protein' % distance).resids
+    clashing_sol_resids = u.select_atoms('resname SOL and around %d %s' % (distance, selected_group)) .resids
 
     print 'Removing %d SOL molecules' % len(clashing_sol_resids)
 
