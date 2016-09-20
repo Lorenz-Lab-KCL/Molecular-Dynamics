@@ -44,6 +44,8 @@ if __name__ == "__main__":
         resids = sorted(resids)
         duplicates = [n1 for n1, n2 in zip(resids, resids[1:]) if n1 == n2]
         print 'Different molecules use the same residue IDs. Make sure the residue IDs are unique ', duplicates
+        print 'Rename the molecule IDs so that they are unique. '
+        print 'Gromacs way is to use "gmx editconf -f file.gro -o file.gro -resnr 1"'
         sys.exit()
 
     # select all water atoms within the vicinity of the protein
