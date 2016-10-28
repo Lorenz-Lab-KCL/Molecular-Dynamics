@@ -1,0 +1,54 @@
+#!/usr/bin/env python
+
+"""
+Normalise the rdf results from gxm rdf. The probability should converge to 1, but it looks that a system like ours,
+ with one layer of self-assembled monolayers and then water, does not lead to this convergence.
+
+ Process: take the last value and divide all values by that value.
+"""
+
+import csv
+import os
+import argparse
+
+import sys
+
+def normalise_rdf_file(filepath, output_path):
+    rdf_file_lines = open(filepath).readlines()
+    csv_tokenizer = csv.reader(rdf_file_lines, delimiter=' ', skipinitialspace=True)
+    # Extract only the (time: rdf_probability) tuples
+    data = [(float(line[0]), float(line[1])) for line in csv_tokenizer
+            if not line[0].startswith('@') and not line[0].startswith('#')]
+
+    # Extract the title lines
+    meta_lines = filter(lambda x: x.startswith('@') or x.startswith('#'), rdf_file_lines)
+
+    # get the last value for normalisation
+    last_value = data[-1][1]
+
+    # divide all values by the last value
+    normalised = [(time, prob/last_value) for time, prob in data]
+
+    # save
+    with open(output_path, 'w') as file:
+        # copy the meta data first
+        file.writelines(meta_lines)
+
+        # write normalised data
+        writer = csv.writer(file, delimiter=' ')
+        [writer.writerow(row) for row in normalised]
+
+
+if __name__ == "__main__":
+    argparser = argparse.ArgumentParser(description="Divide all rdf values by the last value")
+    argparser.add_argument("-f", help="filename .xvg from which to remove", metavar="source .gro filename", required=True, type=str)
+    argparser.add_argument("-o", help="name of the output filename", metavar="output filename", required=True)
+
+    # parse arguments
+    args = argparser.parse_args(sys.argv[1:])
+    source_filename = args.f
+    assert os.path.exists(source_filename), "Argument -f must point to a file"
+
+    output_filename = args.o
+
+    normalise_rdf_file(source_filename, output_filename)
