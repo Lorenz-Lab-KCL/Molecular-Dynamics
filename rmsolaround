@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 """
 Remove the water around the protein and make sure that the whole molecules have been removed.
