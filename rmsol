@@ -46,6 +46,16 @@ if __name__ == "__main__":
         if atom.resname != 'SOL':
             continue
 
+        if atom.resid == 99999:
+            print "WARNING: ----------------------------------------------"
+            print "WARNING: If you are relying on .gro format this opertaion can lead to errors."
+            print "WARNING: .gro (and some others) format max ID is 99999 meaning that multiple water molecules"
+            print "WARNING: might have the same molecule ID - And this script relies on the uniqueness molecule ID for the removal "
+            print "WARNING WORKAROUND: Convert your file first to .crd format (e.g. with MDAnalysis)"
+            print "WARNING WORKAROUND: apply the script and then at the end convert your file back to your original format"
+            print "WARNING WORKAROUND: .crd requires the IDs to be unique "
+            print "WARNING: ----------------------------------------------"
+
         zpos = atom.position[2]
         if zpos > zbegin and zpos < zend:
             exile_list_resids.add(atom.resid)
