@@ -16,6 +16,7 @@ import argparse
 import sys
 import os
 import MDAnalysis
+from collections import Counter
 
 if __name__ == "__main__":
     # argument parser
@@ -39,26 +40,31 @@ if __name__ == "__main__":
 
     u = MDAnalysis.Universe(source_filename)
 
-    # solvent molecules with at least one atom in the Z interval to be excluded
-    exile_list_resids = set()
+    # ids of solvent molecules with at least one atom in the Z interval to be excluded
+    exile_list_resids_nonuniq = []
     for atom in u.atoms:
         # is solvent?
         if atom.resname != 'SOL':
             continue
 
-        if atom.resid == 99999:
-            print "WARNING: ----------------------------------------------"
-            print "WARNING: If you are relying on .gro format this opertaion can lead to errors."
-            print "WARNING: .gro (and some others) format max ID is 99999 meaning that multiple water molecules"
-            print "WARNING: might have the same molecule ID - And this script relies on the uniqueness molecule ID for the removal "
-            print "WARNING WORKAROUND: Convert your file first to .crd format (e.g. with MDAnalysis)"
-            print "WARNING WORKAROUND: apply the script and then at the end convert your file back to your original format"
-            print "WARNING WORKAROUND: .crd requires the IDs to be unique "
-            print "WARNING: ----------------------------------------------"
-
         zpos = atom.position[2]
         if zpos > zbegin and zpos < zend:
-            exile_list_resids.add(atom.resid)
+            exile_list_resids_nonuniq.append(atom.resid)
+
+    # is there a case where more than 3 atoms have the same resids? Because I use a 3-point water model
+    resid_counter = Counter(exile_list_resids_nonuniq)
+    if any(x > 3 for x in resid_counter.values()):
+        print 'More than 3 atoms have the same resid. '
+        print "WARNING: ----------------------------------------------"
+        print "WARNING: If you are relying on .gro format this opertaion can lead to errors."
+        print "WARNING: .gro (and some others) format max ID is 99999 meaning that multiple water molecules"
+        print "WARNING: might have the same molecule ID - And this script relies on the uniqueness molecule ID for the removal "
+        print "WARNING WORKAROUND: Convert your file first to .crd format (e.g. with MDAnalysis)"
+        print "WARNING WORKAROUND: apply the script and then at the end convert your file back to your original format"
+        print "WARNING WORKAROUND: .crd requires the IDs to be unique "
+        print "WARNING: ----------------------------------------------\n"
+
+    exile_list_resids = set(exile_list_resids_nonuniq)
 
     if len(exile_list_resids) == 0:
         print 'No molecules to be removed'
@@ -67,7 +73,8 @@ if __name__ == "__main__":
     print 'Number of SOL molecules to be removed: ', len(exile_list_resids)
 
     # atom indices without the excluded molecules
-    survivors_ids = [atom.id for atom in u.atoms if atom.resid not in exile_list_resids]
+    # list indexing begins with 0, and atom ids start from 1
+    survivors_ids = [atom.id - 1 for atom in u.atoms if atom.resid not in exile_list_resids]
     filtered = u.atoms[survivors_ids]
 
     if filtered.n_atoms == 0:
