@@ -49,12 +49,12 @@ if __name__ == "__main__":
         sys.exit()
 
     # select all water atoms within the vicinity of the protein
-    clashing_sol_resids = u.select_atoms('resname SOL and around %d %s' % (distance, selected_group)) .resids
+    clashing_sol_resids = u.select_atoms('resname SOL and around %d %s' % (distance, selected_group)).resids
 
     print 'Removing %d SOL molecules' % len(clashing_sol_resids)
 
     # select all except the clashing
-    survivors_ids = [atom.id for atom in u.atoms if atom.resid not in clashing_sol_resids]
+    survivors_ids = [atom.id - 1 for atom in u.atoms if atom.resid not in clashing_sol_resids]
 
     filtered = u.atoms[survivors_ids]
     filtered.atoms.write(output_filename)
