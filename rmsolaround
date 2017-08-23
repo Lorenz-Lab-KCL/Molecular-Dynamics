@@ -21,7 +21,7 @@ if __name__ == "__main__":
     argparser = argparse.ArgumentParser(description="Removes the water/sol molecules around any atoms in the protein")
     argparser.add_argument("-f", help="filename .gro from which to remove", metavar="source .gro filename", required=True, type=str)
     argparser.add_argument("-o", help="name of the filename", metavar="output filename", required=True)
-    argparser.add_argument("-d", help="distance in angstroms (default 2 angstroms)", metavar="float", type=float, default=2)
+    argparser.add_argument("-d", help="distance in angstroms (default 2 angstroms)", metavar="float", type=float, default=1.5)
     argparser.add_argument("-sel", help="select group around which SOL should be removed. Look into selection in mdanalysis for more."
                                         , metavar="e.g. protein", type=str, default="protein")
 
