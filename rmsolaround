@@ -38,7 +38,7 @@ if __name__ == "__main__":
     print 'Molecule type of which some molecules will be removed counts molecules initially:', len(to_be_rm_type)
 
     # sol residues to be removed
-    surrounding_molecules = u.select_atoms('resname SOL and around %d %s' % (distance, selected_group))
+    surrounding_molecules = u.select_atoms('%s and around %f %s' % (surround_group, distance, selected_group))
 
     print ('Removing SOL molecules: %d' % len(surrounding_molecules.residues))
 
