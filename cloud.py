@@ -47,10 +47,10 @@ def pbc_correct(coord, pbc):
     return coord
 
 # input files
-gro_path = '/home/dresio/sakiru/out.gro'
-xtc_path = '/home/dresio/sakiru/2ns.xtc'
+gro_path = 'my.gro'
+xtc_path = 'my.xtc'
 # output file
-out_filepath = '/home/dresio/sakiru/within5_OW_testpbc_originshifting.pdb'
+out_filepath = 'within5_OW_testpbc_originshifting.pdb'
 
 # create the 'universe'
 u = MDAnalysis.Universe(gro_path, xtc_path)
